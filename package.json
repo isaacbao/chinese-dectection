@@ -1,0 +1,16 @@
+{
+    "name": "chinese-dectection",
+    "version": "0.1.0",
+    "description": "demo for chinese dectection for some captcha",
+    "author": "Lou (dananad@126.com)",
+    "dependencies": {
+        "tesseract.js": "latest",
+        "jimp": "latest",
+        "find-root": "latest"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/isaacbao/selfhigh-documenting/.git"
+    }
+}
