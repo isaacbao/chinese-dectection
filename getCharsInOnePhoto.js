@@ -14,25 +14,24 @@ Jimp.read(imagePath)
   .then(function (image) {
     let width = image.bitmap.width
     let height = image.bitmap.height
-
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-
-        let pixelColor = image.getPixelColor(x, y)
-        let pixel = {
-          x: x,
-          y: y,
-          color: Jimp.intToRGBA(pixelColor)
+        let pixel = getPixelFromImage(x, y, image)
+        let pixelsInOneChar = []
+        pixelsInOneChar = visitPixelBeside(pixel, pixelsVisited, pixelsInOneChar, image)
+        if (pixelsInOneChar && pixelsInOneChar.length > 0) {
+          allCharsPixel.push(pixelsInOneChar)
         }
-        visitPixelBeside(pixel)
-        if (isBlack(pixel))
-          console.log(util.inspect(pixel))
       }
     }
+    console.log(util.inspect(allCharsPixel))
+    pasteCharOnNewImage(allCharsPixel[0], './test/output/testImage.jpg')
   })
   .catch(function (err) {
     console.log(util.inspect(err))
   })
+
+
 
 let isBlack = function (pixel) {
   if (pixel && pixel.color) {
@@ -41,6 +40,18 @@ let isBlack = function (pixel) {
   return false
 }
 
+let getPixelFromImage = function (x, y, image) {
+  if (!image.getPixelColor) {
+    console.log(util.inspect(image))
+  }
+  let color = image.getPixelColor(x, y)
+  let resultPixel = {
+    x: x,
+    y: y,
+    color: Jimp.intToRGBA(color)
+  }
+  return resultPixel
+}
 
 let isPixelVisit = function (pixel, pixelsVisited) {
   let positionString = pixel.x + ',' + pixel.y
@@ -57,56 +68,89 @@ let isPixelVisit = function (pixel, pixelsVisited) {
  * @param  {[type]} allPixelsInOneChar [某一个字中的像素点]
  * @param  {[type]} allPixelsInPhoto   [图片中的所有像素点]
  */
-function visitPixelBeside(pixel, pixelsVisited, allPixelsInOneChar, image) {
-  let allPixelsInOneChar = []
+let visitPixelBeside = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  // let allPixelsInOneChar = []
   if (isPixelVisit(pixel, pixelsVisited)) {
     return
   }
   let positionString = pixel.x + ',' + pixel.y
   pixelsVisited[positionString] = true
 
-  if (!isPixelBlack(pixel)) {
+  if (!isBlack(pixel)) {
     return
   }
   allPixelsInOneChar.push(pixel)
 
-  // //→
-  // visitPixelRight(pixel, pixelsVisited, allPixelsInOneChar, allPixelsInPhoto)
-  //
-  // //↘
-  // visitPixelRightDown(pixel, pixelsVisited, allPixelsInOneChar, allPixelsInPhoto)
-  //
-  // //↓
-  // visitPixelDown(pixel, pixelsVisited, allPixelsInOneChar, allPixelsInPhoto)
-  //
-  // //↙
-  // visitPixelLeftDown(pixel, pixelsVisited, allPixelsInOneChar, allPixelsInPhoto)
+  //→
+  visitPixelRight(pixel, pixelsVisited, allPixelsInOneChar, image)
 
+  //↘
+  visitPixelRightDown(pixel, pixelsVisited, allPixelsInOneChar, image)
+
+  //↓
+  visitPixelDown(pixel, pixelsVisited, allPixelsInOneChar, image)
+
+  //↙
+  visitPixelLeftDown(pixel, pixelsVisited, allPixelsInOneChar, image)
+
+  console.log(util.inspect(allPixelsInOneChar))
   return allPixelsInOneChar
 }
 
-function visitPixelRight(pixel, image) {
-  var pixelToVisit = getRigthPixel(pixel, allPixelsInPhoto)
-  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, allPixelsInPhoto)
+let visitPixelRight = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  let pixelToVisit = getRigthPixel(pixel, image)
+  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, image)
 }
 
-function visitPixelRightDown(pixel, allPixelsInPhoto) {
-  var pixelToVisit = getRightDownPixel(pixel, allPixelsInPhoto)
-  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, allPixelsInPhoto)
+let getRigthPixel = function (pixel, image) {
+  let x = pixel.x + 1
+  let y = pixel.y
+  return getPixelFromImage(x, y, image)
 }
 
-function visitPixelDown(pixel) {
-  var pixelToVisit = getDownPixel(pixel, allPixelsInPhoto)
-  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, allPixelsInPhoto)
+let visitPixelRightDown = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  let pixelToVisit = getRightDownPixel(pixel, image)
+  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, image)
 }
 
-function visitPixelLeftDown(pixel) {
-  var pixelToVisit = getLeftDownPixel(pixel, allPixelsInPhoto)
-  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, allPixelsInPhoto)
+let getRightDownPixel = function (pixel, image) {
+  let x = pixel.x + 1
+  let y = pixel.y + 1
+  return getPixelFromImage(x, y, image)
 }
 
+let visitPixelDown = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  var pixelToVisit = getDownPixel(pixel, image)
+  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, image)
+}
 
-function pasteCharOnNewPhoto(allPixelsInOneChar, newPhoto) {
-  // TODO
-  // 最后把这个字中的像素点paste到一张新的图里，就把这个字提取出来了
+let getDownPixel = function (pixel, image) {
+  let x = pixel.x
+  let y = pixel.y + 1
+  return getPixelFromImage(x, y, image)
+}
+
+let visitPixelLeftDown = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  var pixelToVisit = getLeftDownPixel(pixel, image)
+  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, image)
+}
+
+let getLeftDownPixel = function (pixel, image) {
+  let x = pixel.x - 1
+  let y = pixel.y + 1
+  return getPixelFromImage(x, y, image)
+}
+
+// 最后把这个字中的像素点paste到一张新的图里，就把这个字提取出来了
+function pasteCharOnNewImage(allPixelsInOneChar, newImagePath) {
+  let image = new Jimp(256, 256, function (err, image) {})
+
+  for (let i = 0; i < allPixelsInOneChar.length; i++) {
+    let pixel = allPixelsInOneChar[i]
+    let colorRGBA = pixel.color
+    let colorHex = Jimp.rgbaToInt(colorRGBA.r, colorRGBA.g, colorRGBA.b, colorRGBA.a)
+    image.setPixelColor(colorHex, pixel.x, pixel.y)
+  }
+  image.write(newImagePath)
+
 }
