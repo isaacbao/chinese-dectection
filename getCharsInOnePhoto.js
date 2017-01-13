@@ -4,7 +4,7 @@ const util = require('util')
 const imageDir = './test/resource/imagelibrary/imagelibrary/'
 let imagePath = imageDir + 'big_ccp_ALL1_nodiff_nzd.png'
 
-//存放某多组像素，每组像素都组成一个汉字
+//存放多组像素，每组像素都组成一个汉字
 let allCharsPixel = []
 
 //存放已访问过的像素点的数组
@@ -24,7 +24,7 @@ Jimp.read(imagePath)
         }
       }
     }
-    console.log(util.inspect(allCharsPixel))
+    console.log(allCharsPixel.length)
     pasteCharOnNewImage(allCharsPixel[0], './test/output/testImage.jpg')
   })
   .catch(function (err) {
@@ -93,7 +93,7 @@ let visitPixelBeside = function (pixel, pixelsVisited, allPixelsInOneChar, image
   //↙
   visitPixelLeftDown(pixel, pixelsVisited, allPixelsInOneChar, image)
 
-  console.log(util.inspect(allPixelsInOneChar))
+  console.log(allPixelsInOneChar)
   return allPixelsInOneChar
 }
 
