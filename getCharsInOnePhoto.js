@@ -93,7 +93,7 @@ let visitPixelBeside = function (pixel, pixelsVisited, allPixelsInOneChar, image
   //↙
   visitPixelLeftDown(pixel, pixelsVisited, allPixelsInOneChar, image)
 
-  console.log(allPixelsInOneChar)
+  // console.log(allPixelsInOneChar)
   return allPixelsInOneChar
 }
 
@@ -143,7 +143,7 @@ let getLeftDownPixel = function (pixel, image) {
 
 // 最后把这个字中的像素点paste到一张新的图里，就把这个字提取出来了
 function pasteCharOnNewImage(allPixelsInOneChar, newImagePath) {
-  let image = new Jimp(256, 256, function (err, image) {})
+  let image = new Jimp(256, 256, 0xFFFFFFFF, function (err, image) {})
 
   for (let i = 0; i < allPixelsInOneChar.length; i++) {
     let pixel = allPixelsInOneChar[i]
