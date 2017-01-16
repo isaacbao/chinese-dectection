@@ -25,7 +25,10 @@ Jimp.read(imagePath)
       }
     }
     console.log(allCharsPixel.length)
-    pasteCharOnNewImage(allCharsPixel[0], './test/output/testImage.jpg')
+    for (let i = 0; i < allCharsPixel.length; i++) {
+      pasteCharOnNewImage(allCharsPixel[i], './test/output/testImage' + i + '.jpg')
+    }
+
   })
   .catch(function (err) {
     console.log(util.inspect(err))
@@ -61,8 +64,7 @@ let isPixelVisit = function (pixel, pixelsVisited) {
 /**
  *   判断一个像素点是否是黑色像素，如果是黑色像素，则把这个像素点加到allPixelsInOneChar
  *   同时通过递归遍历该像素点周围8个方向的像素点是否是黑色像素，从而把某一个中文汉字中的像素点全部提取出来
- *   （因为是按照，从上到下，从左到右的顺序遍历图片中的所有像素点，所以 ← ↖ ↑ ↗ 这几个方向必定是已经访问过的，
- *   只需要访问→ ↘ ↓ ↙ 即可）
+
  * @param  {[type]} pixel              [要判断的像素点]
  * @param  {[type]} pixelsVisited      [已访问的像素点]
  * @param  {[type]} allPixelsInOneChar [某一个字中的像素点]
@@ -81,6 +83,12 @@ let visitPixelBeside = function (pixel, pixelsVisited, allPixelsInOneChar, image
   }
   allPixelsInOneChar.push(pixel)
 
+  //↑
+  visitPixelUp(pixel, pixelsVisited, allPixelsInOneChar, image)
+
+  //↗
+  visitPixelUpRight(pixel, pixelsVisited, allPixelsInOneChar, image)
+
   //→
   visitPixelRight(pixel, pixelsVisited, allPixelsInOneChar, image)
 
@@ -93,8 +101,36 @@ let visitPixelBeside = function (pixel, pixelsVisited, allPixelsInOneChar, image
   //↙
   visitPixelLeftDown(pixel, pixelsVisited, allPixelsInOneChar, image)
 
+  //←
+  visitPixelLeft(pixel, pixelsVisited, allPixelsInOneChar, image)
+
+  //↖
+  visitPixelLeftUp(pixel, pixelsVisited, allPixelsInOneChar, image)
+
   // console.log(allPixelsInOneChar)
   return allPixelsInOneChar
+}
+
+let visitPixelUp = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  let pixelToVisit = getUpPixel(pixel, image)
+  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, image)
+}
+
+let getUpPixel = function (pixel, image) {
+  let x = pixel.x
+  let y = pixel.y - 1
+  return getPixelFromImage(x, y, image)
+}
+
+let visitPixelUpRight = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  let pixelToVisit = getUpRigthPixel(pixel, image)
+  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, image)
+}
+
+let getUpRigthPixel = function (pixel, image) {
+  let x = pixel.x + 1
+  let y = pixel.y - 1
+  return getPixelFromImage(x, y, image)
 }
 
 let visitPixelRight = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
@@ -141,9 +177,31 @@ let getLeftDownPixel = function (pixel, image) {
   return getPixelFromImage(x, y, image)
 }
 
+let visitPixelLeft = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  var pixelToVisit = getLeftPixel(pixel, image)
+  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, image)
+}
+
+let getLeftPixel = function (pixel, image) {
+  let x = pixel.x - 1
+  let y = pixel.y
+  return getPixelFromImage(x, y, image)
+}
+
+let visitPixelLeftUp = function (pixel, pixelsVisited, allPixelsInOneChar, image) {
+  var pixelToVisit = getLeftUpPixel(pixel, image)
+  visitPixelBeside(pixelToVisit, pixelsVisited, allPixelsInOneChar, image)
+}
+
+let getLeftUpPixel = function (pixel, image) {
+  let x = pixel.x - 1
+  let y = pixel.y - 1
+  return getPixelFromImage(x, y, image)
+}
+
 // 最后把这个字中的像素点paste到一张新的图里，就把这个字提取出来了
 function pasteCharOnNewImage(allPixelsInOneChar, newImagePath) {
-  let image = new Jimp(256, 256, 0xFFFFFFFF, function (err, image) {})
+  let image = new Jimp(280, 127, 0xFFFFFFFF, function (err, image) {})
 
   for (let i = 0; i < allPixelsInOneChar.length; i++) {
     let pixel = allPixelsInOneChar[i]
