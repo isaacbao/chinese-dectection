@@ -27,6 +27,8 @@ Jimp.read(imagePath)
             position: position,
             pixels: pixelsInColorLump
           }
+          let radius = getColorLumpRadius(colorLump)
+
           allColorLump.push(colorLump)
         }
       }
@@ -62,6 +64,21 @@ let getColorLumpPosition = function (pixelsInColorLump) {
 
   return position
 
+}
+
+/**
+ * 找出一个圆，可以刚好把色块中的所有像素点圈在里面，返回这个圆的半径
+ * @param  {ColorLump} colorLump [色块]
+ * @return {Int}           [圆的半径]
+ */
+let getColorLumpRadius = function (colorLump) {
+  let center = colorLump.position
+  let pixels = colorLump.pixels
+  let pointAmount = pixels.length
+  for (let i = 0; i < pointAmount; i++) {
+    let pixel = pixels[i]
+    pixel.x
+  }
 }
 
 let isBlack = function (pixel) {
@@ -241,5 +258,14 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
   }
   image.setPixelColor(JIMP_RED, colorLump.position.x, colorLump.position.y)
   image.write(newImagePath)
+
+}
+
+/**
+ * 旋转卡壳算法计算计算图形的长宽
+ * @param  {[type]} image [description]
+ * @return {[type]}       [description]
+ */
+let rotateJam = function (image) {
 
 }
