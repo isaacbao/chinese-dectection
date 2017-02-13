@@ -75,9 +75,13 @@ let getColorLumpRadius = function (colorLump) {
   let center = colorLump.position
   let pixels = colorLump.pixels
   let pointAmount = pixels.length
+  let maxDistance = 0
   for (let i = 0; i < pointAmount; i++) {
     let pixel = pixels[i]
-    pixel.x
+    let distance = sqrt(pow((pixel.x - center.x), 2) + pow((pixel.y - center.y), 2))
+    if (distance > maxDistance) {
+      maxDistance = distance
+    }
   }
 }
 
