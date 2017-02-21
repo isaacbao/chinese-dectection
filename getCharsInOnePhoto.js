@@ -38,7 +38,7 @@ Jimp.read(imagePath)
     console.log(allColorLump.length)
     for (let i = 0; i < allColorLump.length; i++) {
       let colorLump = allColorLump[i]
-      console.log("position:" + colorLump.position + "\nradius:" + colorLump.radius)
+      console.log("position:" + util.inspect(colorLump.position) + "\nradius:" + colorLump.radius)
       if (isNormalCharRadius(colorLump.radius)) {
         let minDistance = 999
         let minJ = undefined
@@ -53,9 +53,9 @@ Jimp.read(imagePath)
           }
         }
         if (minDistance < 15) {
-          console.log(allColorLump[i].radius)
+          console.log("position:" + util.inspect(allColorLump[i].position) + "radius before combine:\n" + allColorLump[i].radius + "\n")
           combineColorLump(allColorLump[i], allColorLump[minJ])
-          console.log(allColorLump[i].radius)
+          console.log("position:" + util.inspect(allColorLump[i].position) + "radius after combine:\n" + allColorLump[i].radius + "\n")
         }
         pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
       }
@@ -66,18 +66,22 @@ Jimp.read(imagePath)
   })
 
 
-let combineColorLump(lump1, lump2) {
-  lump1.pixels.push(lump2.pixels)
+let combineColorLump = function (lump1, lump2) {
+  console.log("lump1.pixels.length:" + lump1.pixels.length)
+  console.log("lump2.pixels.length:" + lump2.pixels.length)
+  lump1.pixels = lump1.pixels.concat(lump2.pixels)
+  console.log("lump1.pixels.length after:" + lump1.pixels.length)
   lump1.position = getColorLumpPosition(lump1.pixels)
   lump1.radius = getColorLumpRadius(lump1)
+    // console.log("lump combined" + util.inspect(lump1))
   return lump1
 }
 
 /**
  * 判断一个半径是不是一个汉字的平均半径
  */
-let isNormalCharRadius(radius) {
-  15 < radius || radius < 17
+let isNormalCharRadius = function (radius) {
+  return (15 < radius || radius < 17)
 }
 
 let getColorLumpPosition = function (pixelsInColorLump) {
@@ -94,10 +98,10 @@ let getColorLumpPosition = function (pixelsInColorLump) {
   let aveY = sumY / pointAmount
 
   let position = {
-    x: parseInt(aveX, 10),
-    y: parseInt(aveY, 10)
-  }
-  console.log('position:' + util.inspect(position))
+      x: parseInt(aveX, 10),
+      y: parseInt(aveY, 10)
+    }
+    // console.log('position:' + util.inspect(position))
 
   return position
 
@@ -300,6 +304,7 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
   for (let i = 0; i < allpixelsInColorLump.length; i++) {
     let pixel = allpixelsInColorLump[i]
     let colorRGBA = pixel.color
+      // console.log("pixel:" + util.inspect(pixel))
     let colorHex = Jimp.rgbaToInt(colorRGBA.r, colorRGBA.g, colorRGBA.b, colorRGBA.a)
     image.setPixelColor(colorHex, pixel.x, pixel.y)
   }
