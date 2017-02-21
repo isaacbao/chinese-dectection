@@ -42,7 +42,7 @@ Jimp.read(imagePath)
       if (isNormalCharRadius(colorLump.radius)) {
         let minDistance = 999
         let minJ = undefined
-        for (let j = 0; j < allColorLump.length; j++) {
+        for (let j = i + 1; j < allColorLump.length; j++) {
           if (j === i) {
             continue
           }
@@ -55,9 +55,11 @@ Jimp.read(imagePath)
         if (minDistance < 15) {
           console.log("position:" + util.inspect(allColorLump[i].position) + "radius before combine:\n" + allColorLump[i].radius + "\n")
           combineColorLump(allColorLump[i], allColorLump[minJ])
+          allColorLump.splice(minJ, 1)
+          i--
           console.log("position:" + util.inspect(allColorLump[i].position) + "radius after combine:\n" + allColorLump[i].radius + "\n")
         }
-        pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
+        pasteCharOnNewImage(colorLump, './test/output/testImage' + (i + 1) + '.jpg')
       }
     }
   })
@@ -67,10 +69,10 @@ Jimp.read(imagePath)
 
 
 let combineColorLump = function (lump1, lump2) {
-  console.log("lump1.pixels.length:" + lump1.pixels.length)
-  console.log("lump2.pixels.length:" + lump2.pixels.length)
+  // console.log("lump1.pixels.length:" + lump1.pixels.length)
+  // console.log("lump2.pixels.length:" + lump2.pixels.length)
   lump1.pixels = lump1.pixels.concat(lump2.pixels)
-  console.log("lump1.pixels.length after:" + lump1.pixels.length)
+    // console.log("lump1.pixels.length after:" + lump1.pixels.length)
   lump1.position = getColorLumpPosition(lump1.pixels)
   lump1.radius = getColorLumpRadius(lump1)
     // console.log("lump combined" + util.inspect(lump1))
