@@ -40,6 +40,7 @@ Jimp.read(imagePath)
       let colorLump = allColorLump[i]
       pasteCharOnNewImage(colorLump, './test/output/lump' + i + '.jpg')
     }
+
     for (let i = 0; i < allColorLump.length; i++) {
       let colorLump = allColorLump[i]
       console.log("current:" + i + "\nposition:" + util.inspect(colorLump.position) + "\nradius:" + colorLump.radius + "\n")
@@ -56,8 +57,8 @@ Jimp.read(imagePath)
             minJ = j
           }
         }
-        pasteCharOnNewImage(colorLump, './test/output/lump' + i + '.jpg')
-        if (minDistance < 15) {
+        console.log("minDistance of " + minJ + " and " + i + ":" + minDistance)
+        if (minDistance < 30) {
           let lumpToCombine = allColorLump[i]
           let lumpToAttach = allColorLump[minJ]
           console.log("combine with:" + minJ + "\nposition:" + util.inspect(lumpToAttach.position) + "radius " + lumpToAttach.radius + "\n")
@@ -67,8 +68,13 @@ Jimp.read(imagePath)
           i--
           console.log("after combine:\nposition:" + util.inspect(lumpToCombine.position) + "radius " + lumpToCombine.radius + "\n")
         }
-        pasteCharOnNewImage(colorLump, './test/output/testImage' + (i + 1) + '.jpg')
       }
+      console.log("allColorLump.length" + allColorLump.length);
+    }
+
+    for (let i = 0; i < allColorLump.length; i++) {
+      let colorLump = allColorLump[i]
+      pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
     }
   })
   .catch(function (err) {
