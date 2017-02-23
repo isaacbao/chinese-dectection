@@ -38,6 +38,10 @@ Jimp.read(imagePath)
     console.log(allColorLump.length)
     for (let i = 0; i < allColorLump.length; i++) {
       let colorLump = allColorLump[i]
+      pasteCharOnNewImage(colorLump, './test/output/lump' + i + '.jpg')
+    }
+    for (let i = 0; i < allColorLump.length; i++) {
+      let colorLump = allColorLump[i]
       console.log("current:" + i + "\nposition:" + util.inspect(colorLump.position) + "\nradius:" + colorLump.radius + "\n")
       if (isNormalCharRadius(colorLump.radius)) {
         let minDistance = 999
@@ -52,13 +56,16 @@ Jimp.read(imagePath)
             minJ = j
           }
         }
+        pasteCharOnNewImage(colorLump, './test/output/lump' + i + '.jpg')
         if (minDistance < 15) {
-          console.log("combine with:" + minJ + "\nposition:" + util.inspect(allColorLump[minJ].position) + "radius " + allColorLump[minJ].radius + "\n")
-          console.log("before combine:\nposition:" + util.inspect(allColorLump[i].position) + "radius " + allColorLump[i].radius + "\n")
-          combineColorLump(allColorLump[i], allColorLump[minJ])
+          let lumpToCombine = allColorLump[i]
+          let lumpToAttach = allColorLump[minJ]
+          console.log("combine with:" + minJ + "\nposition:" + util.inspect(lumpToAttach.position) + "radius " + lumpToAttach.radius + "\n")
+          console.log("before combine:\nposition:" + util.inspect(lumpToCombine.position) + "radius " + lumpToCombine.radius + "\n")
+          combineColorLump(lumpToCombine, lumpToAttach)
           allColorLump.splice(minJ, 1)
           i--
-          console.log("after combine:\nposition:" + util.inspect(allColorLump[i].position) + "radius " + allColorLump[i].radius + "\n")
+          console.log("after combine:\nposition:" + util.inspect(lumpToCombine.position) + "radius " + lumpToCombine.radius + "\n")
         }
         pasteCharOnNewImage(colorLump, './test/output/testImage' + (i + 1) + '.jpg')
       }
@@ -91,6 +98,7 @@ let getColorLumpPosition = function (pixelsInColorLump) {
   let sumX = 0
   let sumY = 0
   let pointAmount = pixelsInColorLump.length
+    // console.log("pointAmount:" + pointAmount)
   for (let i = 0; i < pointAmount; i++) {
     let pixel = pixelsInColorLump[i]
     sumX += pixel.x
