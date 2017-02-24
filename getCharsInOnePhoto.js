@@ -338,3 +338,12 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
 let rotateJam = function (image) {
 
 }
+
+/**
+ * 旋转汉字 归一化
+ * @param  {CharImage} charImage [图片对象]
+ * @return {[type]}       [旋转后的汉字]
+ */
+let normalization = function (charImage) {
+  let position = charImage.position
+}
