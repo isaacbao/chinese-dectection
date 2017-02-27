@@ -345,5 +345,13 @@ let rotateJam = function (image) {
  * @return {[type]}       [旋转后的汉字]
  */
 let normalization = function (charImage) {
+  let maxRedius = charImage.redius
   let position = charImage.position
+  let top = position.y + maxRedius
+  let bottom = position.y + maxRedius
+  let pixels = charImage.pixels
+  for (let i = 0; i < pixels.length; i++) {
+    let pixel = pixels[i]
+    let pixelPosition
+  }
 }
