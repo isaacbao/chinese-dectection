@@ -350,8 +350,19 @@ let normalization = function (charImage) {
   let top = position.y + maxRedius
   let bottom = position.y + maxRedius
   let pixels = charImage.pixels
-  for (let i = 0; i < pixels.length; i++) {
-    let pixel = pixels[i]
-    let pixelPosition
+  let pixelsInHorizons = []
+  for (let horizon = top; horizon >= bottom; horizon--) {
+    let pixelsInHorizon = 0
+    for (let i = 0; i < pixels.length; i++) {
+      let pixel = pixels[i]
+      let pixelPosition = pixel.position
+      if (pixelPosition.y === horizon) {
+        pixelsInHorizon++
+      }
+    }
+    pixelsInHorizons.push(pixelsInHorizon)
+  }
+  for (let i = 1; i < pixelsInHorizons.length; i++) {
+
   }
 }
