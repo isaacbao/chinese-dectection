@@ -13,83 +13,84 @@ let allColorLump = []
 //存放已访问过的像素点的数组
 let pixelsVisited = {}
 
-Jimp.read(imagePath)
-  .then(function (image) {
-    let width = image.bitmap.width
-    let height = image.bitmap.height
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        let pixel = getPixelFromImage(x, y, image)
-        let pixelsInColorLump = []
-        pixelsInColorLump = visitPixelBeside(pixel, pixelsVisited, pixelsInColorLump, image)
-        if (pixelsInColorLump && pixelsInColorLump.length > 0) {
-          let position = getColorLumpPosition(pixelsInColorLump)
-          let colorLump = {
-            position: position,
-            pixels: pixelsInColorLump
-          }
-          let radius = getColorLumpRadius(colorLump)
-          colorLump.radius = radius
+let main = function () {
+  Jimp.read(imagePath)
+    .then(function (image) {
+      let width = image.bitmap.width
+      let height = image.bitmap.height
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let pixel = getPixelFromImage(x, y, image)
+          let pixelsInColorLump = []
+          pixelsInColorLump = visitPixelBeside(pixel, pixelsVisited, pixelsInColorLump, image)
+          if (pixelsInColorLump && pixelsInColorLump.length > 0) {
+            let position = getColorLumpPosition(pixelsInColorLump)
+            let colorLump = {
+              position: position,
+              pixels: pixelsInColorLump
+            }
+            let radius = getColorLumpRadius(colorLump)
+            colorLump.radius = radius
 
-          allColorLump.push(colorLump)
+            allColorLump.push(colorLump)
+          }
         }
       }
-    }
-    console.log(allColorLump.length)
-    for (let i = 0; i < allColorLump.length; i++) {
-      let colorLump = allColorLump[i]
-      pasteCharOnNewImage(colorLump, './test/output/lump' + i + '.jpg')
-    }
-
-    for (let i = 0; i < allColorLump.length; i++) {
-      let colorLump = allColorLump[i]
-      console.log("current:" + i + "\nposition:" + util.inspect(colorLump.position) + "\nradius:" + colorLump.radius + "\n")
-      if (isNormalCharRadius(colorLump.radius)) {
-        let minDistance = 999
-        let minJ = undefined
-        for (let j = i + 1; j < allColorLump.length; j++) {
-          if (j === i) {
-            continue
-          }
-          let distance = getDistance(allColorLump[j].position, colorLump.position)
-          if (distance < minDistance) {
-            minDistance = distance
-            minJ = j
-          }
-        }
-        console.log("minDistance of " + minJ + " and " + i + ":" + minDistance)
-        if (minDistance < 30) {
-          let lumpToCombine = allColorLump[i]
-          let lumpToAttach = allColorLump[minJ]
-          console.log("combine with:" + minJ + "\nposition:" + util.inspect(lumpToAttach.position) + "radius " + lumpToAttach.radius + "\n")
-          console.log("before combine:\nposition:" + util.inspect(lumpToCombine.position) + "radius " + lumpToCombine.radius + "\n")
-          combineColorLump(lumpToCombine, lumpToAttach)
-          allColorLump.splice(minJ, 1)
-          i--
-          console.log("after combine:\nposition:" + util.inspect(lumpToCombine.position) + "radius " + lumpToCombine.radius + "\n")
-        }
+      console.log(allColorLump.length)
+      for (let i = 0; i < allColorLump.length; i++) {
+        let colorLump = allColorLump[i]
+        pasteCharOnNewImage(colorLump, './test/output/lump' + i + '.jpg')
       }
-      console.log("allColorLump.length" + allColorLump.length);
-    }
 
-    for (let i = 0; i < allColorLump.length; i++) {
-      let colorLump = allColorLump[i]
-      pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
-    }
-  })
-  .catch(function (err) {
-    console.log(util.inspect(err))
-  })
+      for (let i = 0; i < allColorLump.length; i++) {
+        let colorLump = allColorLump[i]
+        console.log('current:' + i + '\nposition:' + util.inspect(colorLump.position) + '\nradius:' + colorLump.radius + '\n')
+        if (isNormalCharRadius(colorLump.radius)) {
+          let minDistance = 999
+          let minJ
+          for (let j = i + 1; j < allColorLump.length; j++) {
+            if (j === i) {
+              continue
+            }
+            let distance = getDistance(allColorLump[j].position, colorLump.position)
+            if (distance < minDistance) {
+              minDistance = distance
+              minJ = j
+            }
+          }
+          console.log('minDistance of ' + minJ + ' and ' + i + ':' + minDistance)
+          if (minDistance < 30) {
+            let lumpToCombine = allColorLump[i]
+            let lumpToAttach = allColorLump[minJ]
+            console.log('combine with:' + minJ + '\nposition:' + util.inspect(lumpToAttach.position) + 'radius ' + lumpToAttach.radius + '\n')
+            console.log('before combine:\nposition:' + util.inspect(lumpToCombine.position) + 'radius ' + lumpToCombine.radius + '\n')
+            combineColorLump(lumpToCombine, lumpToAttach)
+            allColorLump.splice(minJ, 1)
+            i--
+            console.log('after combine:\nposition:' + util.inspect(lumpToCombine.position) + 'radius ' + lumpToCombine.radius + '\n')
+          }
+        }
+        console.log('allColorLump.length' + allColorLump.length)
+      }
 
+      for (let i = 0; i < allColorLump.length; i++) {
+        let colorLump = allColorLump[i]
+        pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
+      }
+    })
+    .catch(function (err) {
+      console.log(util.inspect(err))
+    })
+}
 
 let combineColorLump = function (lump1, lump2) {
-  // console.log("lump1.pixels.length:" + lump1.pixels.length)
-  // console.log("lump2.pixels.length:" + lump2.pixels.length)
+  // console.log('lump1.pixels.length:' + lump1.pixels.length)
+  // console.log('lump2.pixels.length:' + lump2.pixels.length)
   lump1.pixels = lump1.pixels.concat(lump2.pixels)
-    // console.log("lump1.pixels.length after:" + lump1.pixels.length)
+    // console.log('lump1.pixels.length after:' + lump1.pixels.length)
   lump1.position = getColorLumpPosition(lump1.pixels)
   lump1.radius = getColorLumpRadius(lump1)
-    // console.log("lump combined" + util.inspect(lump1))
+    // console.log('lump combined' + util.inspect(lump1))
   return lump1
 }
 
@@ -104,7 +105,7 @@ let getColorLumpPosition = function (pixelsInColorLump) {
   let sumX = 0
   let sumY = 0
   let pointAmount = pixelsInColorLump.length
-    // console.log("pointAmount:" + pointAmount)
+    // console.log('pointAmount:' + pointAmount)
   for (let i = 0; i < pointAmount; i++) {
     let pixel = pixelsInColorLump[i]
     sumX += pixel.x
@@ -115,10 +116,11 @@ let getColorLumpPosition = function (pixelsInColorLump) {
   let aveY = sumY / pointAmount
 
   let position = {
-      x: parseInt(aveX, 10),
-      y: parseInt(aveY, 10)
-    }
-    // console.log('position:' + util.inspect(position))
+    x: parseInt(aveX, 10),
+    y: parseInt(aveY, 10)
+  }
+
+  // console.log('position:' + util.inspect(position))
 
   return position
 
@@ -197,28 +199,28 @@ let visitPixelBeside = function (pixel, pixelsVisited, allpixelsInColorLump, ima
   }
   allpixelsInColorLump.push(pixel)
 
-  //↑
+  // ↑
   visitPixelUp(pixel, pixelsVisited, allpixelsInColorLump, image)
 
-  //↗
+  // ↗
   visitPixelUpRight(pixel, pixelsVisited, allpixelsInColorLump, image)
 
-  //→
+  // →
   visitPixelRight(pixel, pixelsVisited, allpixelsInColorLump, image)
 
   //↘
   visitPixelRightDown(pixel, pixelsVisited, allpixelsInColorLump, image)
 
-  //↓
+  // ↓
   visitPixelDown(pixel, pixelsVisited, allpixelsInColorLump, image)
 
-  //↙
+  // ↙
   visitPixelLeftDown(pixel, pixelsVisited, allpixelsInColorLump, image)
 
-  //←
+  // ←
   visitPixelLeft(pixel, pixelsVisited, allpixelsInColorLump, image)
 
-  //↖
+  // ↖
   visitPixelLeftUp(pixel, pixelsVisited, allpixelsInColorLump, image)
 
   // console.log(allpixelsInColorLump)
@@ -321,7 +323,7 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
   for (let i = 0; i < allpixelsInColorLump.length; i++) {
     let pixel = allpixelsInColorLump[i]
     let colorRGBA = pixel.color
-      // console.log("pixel:" + util.inspect(pixel))
+      // console.log('pixel:' + util.inspect(pixel))
     let colorHex = Jimp.rgbaToInt(colorRGBA.r, colorRGBA.g, colorRGBA.b, colorRGBA.a)
     image.setPixelColor(colorHex, pixel.x, pixel.y)
   }
@@ -331,20 +333,21 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
 }
 
 /**
- * 旋转卡壳算法计算计算图形的长宽
- * @param  {[type]} image [description]
+ * 让汉字在-30°~30°之间等角度间隔旋转（比如旋转-30°，-25°，-20°，-15°……25°，30°）
+ * @param  {ColorLump} colorLump [汉字色块]
+ * @param  {int} step  [旋转角度的间隔，比如在上面的例子中step就是5]
  * @return {[type]}       [description]
  */
-let rotateJam = function (image) {
+let rotateImage30Degree = function (colorLump, step) {
 
 }
 
 /**
  * 旋转汉字 归一化
- * @param  {CharImage} charImage [图片对象]
+ * @param  {ColorLump} colorLump [汉字色块]
  * @return {[type]}       [旋转后的汉字]
  */
-let normalization = function (charImage) {
+let normalization = function (colorLump) {
   let maxRedius = charImage.redius
   let position = charImage.position
   let top = position.y + maxRedius
@@ -362,7 +365,9 @@ let normalization = function (charImage) {
     }
     pixelsInHorizons.push(pixelsInHorizon)
   }
+  let sumAbs = 0
   for (let i = 1; i < pixelsInHorizons.length; i++) {
-
+    let abs = Math.abs(pixelsInHorizons[i], pixelsInHorizons[i - 1])
+    sumAbs += abs
   }
 }
