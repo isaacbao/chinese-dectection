@@ -346,11 +346,13 @@ let changeLumpToImage = function (colorLump) {
  */
 let rotateImage30Degree = function (colorLump, step) {
   let image = changeLumpToImage(colorLump)
-  let degree = 30
-  image.rotate(degree)
-
-  let newImagePath = OUTPUT_DIR + 'degree' + degree
-  image.write(newImagePath)
+  for (let degree = 30; degree >= -30; degree -= step) {
+    image.rotate(degree)
+    console.log("image rotate by:" + degree)
+    let newImagePath = OUTPUT_DIR + 'degree' + degree + '.jpg'
+    console.log("writing image after rotate to " + newImagePath)
+    image.write(newImagePath)
+  }
 }
 
 /**
@@ -382,3 +384,5 @@ let normalization = function (colorLump) {
     sumAbs += abs
   }
 }
+
+// main()
