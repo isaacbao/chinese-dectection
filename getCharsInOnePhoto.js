@@ -4,6 +4,7 @@ const util = require('util')
 
 const imageDir = './test/resource/imagelibrary/imagelibrary/'
 const JIMP_RED = Jimp.rgbaToInt(255, 0, 0, 255)
+const OUTPUT_DIR = './test/output/'
 
 let imagePath = imageDir + 'big_ccp_ALL1_nodiff_nzd.png'
 
@@ -58,25 +59,26 @@ let main = function () {
               minJ = j
             }
           }
-          console.log('minDistance of ' + minJ + ' and ' + i + ':' + minDistance)
+          // console.log('minDistance of ' + minJ + ' and ' + i + ':' + minDistance)
           if (minDistance < 30) {
             let lumpToCombine = allColorLump[i]
             let lumpToAttach = allColorLump[minJ]
-            console.log('combine with:' + minJ + '\nposition:' + util.inspect(lumpToAttach.position) + 'radius ' + lumpToAttach.radius + '\n')
-            console.log('before combine:\nposition:' + util.inspect(lumpToCombine.position) + 'radius ' + lumpToCombine.radius + '\n')
+              // console.log('combine with:' + minJ + '\nposition:' + util.inspect(lumpToAttach.position) + 'radius ' + lumpToAttach.radius + '\n')
+              // console.log('before combine:\nposition:' + util.inspect(lumpToCombine.position) + 'radius ' + lumpToCombine.radius + '\n')
             combineColorLump(lumpToCombine, lumpToAttach)
             allColorLump.splice(minJ, 1)
             i--
-            console.log('after combine:\nposition:' + util.inspect(lumpToCombine.position) + 'radius ' + lumpToCombine.radius + '\n')
+            // console.log('after combine:\nposition:' + util.inspect(lumpToCombine.position) + 'radius ' + lumpToCombine.radius + '\n')
           }
         }
-        console.log('allColorLump.length' + allColorLump.length)
+        // console.log('allColorLump.length' + allColorLump.length)
       }
 
-      for (let i = 0; i < allColorLump.length; i++) {
-        let colorLump = allColorLump[i]
-        pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
-      }
+      rotateImage30Degree(allColorLump[0], 5)
+        // for (let i = 0; i < allColorLump.length; i++) {
+        //   let colorLump = allColorLump[i]
+        //   pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
+        // }
     })
     .catch(function (err) {
       console.log(util.inspect(err))
@@ -317,6 +319,11 @@ let getLeftUpPixel = function (pixel, image) {
 
 // 最后把这个字中的像素点paste到一张新的图里，就把这个字提取出来了
 function pasteCharOnNewImage(colorLump, newImagePath) {
+  let image = changeLumpToImage(colorLump)
+  image.write(newImagePath)
+}
+
+let changeLumpToImage = function (colorLump) {
   let image = new Jimp(280, 127, 0xFFFFFFFF, function (err, image) {})
   let allpixelsInColorLump = colorLump.pixels
 
@@ -328,8 +335,7 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
     image.setPixelColor(colorHex, pixel.x, pixel.y)
   }
   image.setPixelColor(JIMP_RED, colorLump.position.x, colorLump.position.y)
-  image.write(newImagePath)
-
+  return image
 }
 
 /**
@@ -339,7 +345,12 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
  * @return {[type]}       [description]
  */
 let rotateImage30Degree = function (colorLump, step) {
+  let image = changeLumpToImage(colorLump)
+  let degree = 30
+  image.rotate(degree)
 
+  let newImagePath = OUTPUT_DIR + 'degree' + degree
+  image.write(newImagePath)
 }
 
 /**
