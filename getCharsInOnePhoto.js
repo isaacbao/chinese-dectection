@@ -324,15 +324,22 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
 }
 
 let changeLumpToImage = function (colorLump) {
-  let image = new Jimp(280, 127, 0xFFFFFFFF, function (err, image) {})
+
+  let maxRedius = Math.floor(colorLump.redius) + 1
+  let position = colorLump.position
+  let top = position.y + maxRedius
+  let leftEdge = position.x + maxRedius
+
+  let image = new Jimp(2 * maxRedius, 2 * maxRedius, 0xFFFFFFFF, function (err, image) {})
   let allpixelsInColorLump = colorLump.pixels
+
 
   for (let i = 0; i < allpixelsInColorLump.length; i++) {
     let pixel = allpixelsInColorLump[i]
     let colorRGBA = pixel.color
       // console.log('pixel:' + util.inspect(pixel))
     let colorHex = Jimp.rgbaToInt(colorRGBA.r, colorRGBA.g, colorRGBA.b, colorRGBA.a)
-    image.setPixelColor(colorHex, pixel.x, pixel.y)
+    image.setPixelColor(colorHex, pixel.x - leftEdge, pixel.y - top)
   }
   image.setPixelColor(JIMP_RED, colorLump.position.x, colorLump.position.y)
   return image
@@ -361,8 +368,8 @@ let rotateImage30Degree = function (colorLump, step) {
  * @return {[type]}       [旋转后的汉字]
  */
 let normalization = function (colorLump) {
-  let maxRedius = charImage.redius
-  let position = charImage.position
+  let maxRedius = Math.floor(colorLump.redius) + 1
+  let position = colorLump.position
   let top = position.y + maxRedius
   let bottom = position.y + maxRedius
   let pixels = charImage.pixels
