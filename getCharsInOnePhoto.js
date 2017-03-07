@@ -74,7 +74,7 @@ let main = function () {
         // console.log('allColorLump.length' + allColorLump.length)
       }
 
-      rotateImage30Degree(allColorLump[0], 5)
+      rotateImage30Degree(allColorLump[0], 3)
         // for (let i = 0; i < allColorLump.length; i++) {
         //   let colorLump = allColorLump[i]
         //   pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
@@ -325,21 +325,21 @@ function pasteCharOnNewImage(colorLump, newImagePath) {
 
 let changeLumpToImage = function (colorLump) {
 
-  let maxRedius = Math.floor(colorLump.redius) + 1
+  let maxRadius = Math.floor(colorLump.radius) + 1
   let position = colorLump.position
-  let top = position.y + maxRedius
-  let leftEdge = position.x + maxRedius
+  let bottom = position.y - maxRadius
+  let rightEdge = position.x - maxRadius
 
-  let image = new Jimp(2 * maxRedius, 2 * maxRedius, 0xFFFFFFFF, function (err, image) {})
+  // console.log(util.inspect(colorLump))
+  let image = new Jimp(2 * maxRadius, 2 * maxRadius, 0xFFFFFFFF, function (err, image) {})
   let allpixelsInColorLump = colorLump.pixels
 
 
   for (let i = 0; i < allpixelsInColorLump.length; i++) {
     let pixel = allpixelsInColorLump[i]
     let colorRGBA = pixel.color
-      // console.log('pixel:' + util.inspect(pixel))
     let colorHex = Jimp.rgbaToInt(colorRGBA.r, colorRGBA.g, colorRGBA.b, colorRGBA.a)
-    image.setPixelColor(colorHex, pixel.x - leftEdge, pixel.y - top)
+    image.setPixelColor(colorHex, pixel.x - rightEdge, pixel.y - bottom)
   }
   image.setPixelColor(JIMP_RED, colorLump.position.x, colorLump.position.y)
   return image
@@ -353,12 +353,15 @@ let changeLumpToImage = function (colorLump) {
  */
 let rotateImage30Degree = function (colorLump, step) {
   let image = changeLumpToImage(colorLump)
+  console.log(image.rotate)
   for (let degree = 30; degree >= -30; degree -= step) {
-    image.rotate(degree)
+    let tempImage = Object.assign({}, image)
+    console.log(tempImage.rotate)
+    tempImage.rotate(degree)
     console.log("image rotate by:" + degree)
     let newImagePath = OUTPUT_DIR + 'degree' + degree + '.jpg'
     console.log("writing image after rotate to " + newImagePath)
-    image.write(newImagePath)
+    tempImage.write(newImagePath)
   }
 }
 
@@ -368,10 +371,10 @@ let rotateImage30Degree = function (colorLump, step) {
  * @return {[type]}       [旋转后的汉字]
  */
 let normalization = function (colorLump) {
-  let maxRedius = Math.floor(colorLump.redius) + 1
+  let maxRadius = Math.floor(colorLump.radius) + 1
   let position = colorLump.position
-  let top = position.y + maxRedius
-  let bottom = position.y + maxRedius
+  let top = position.y + maxRadius
+  let bottom = position.y + maxRadius
   let pixels = charImage.pixels
   let pixelsInHorizons = []
   for (let horizon = top; horizon >= bottom; horizon--) {
@@ -392,4 +395,4 @@ let normalization = function (colorLump) {
   }
 }
 
-// main()
+main()
