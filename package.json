@@ -6,6 +6,7 @@
     "dependencies": {
         "tesseract.js": "latest",
         "jimp": "latest",
+        "asyncawait":"latest",
         "find-root": "latest"
     },
     "license": "MIT",

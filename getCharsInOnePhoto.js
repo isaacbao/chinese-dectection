@@ -1,5 +1,7 @@
 const Jimp = require('jimp')
 const util = require('util')
+const Async = require('asyncawait/async')
+const Await = require('asyncawait/await') // await是JS给ES7预留的保留字，所以开头大写一下区分开来
   // const Math = require('Math')
 
 const imageDir = './test/resource/imagelibrary/imagelibrary/'
@@ -37,7 +39,6 @@ let main = function () {
           }
         }
       }
-      console.log(allColorLump.length)
       for (let i = 0; i < allColorLump.length; i++) {
         let colorLump = allColorLump[i]
         pasteCharOnNewImage(colorLump, './test/output/lump' + i + '.jpg')
@@ -45,7 +46,6 @@ let main = function () {
 
       for (let i = 0; i < allColorLump.length; i++) {
         let colorLump = allColorLump[i]
-        console.log('current:' + i + '\nposition:' + util.inspect(colorLump.position) + '\nradius:' + colorLump.radius + '\n')
         if (isNormalCharRadius(colorLump.radius)) {
           let minDistance = 999
           let minJ
@@ -59,26 +59,23 @@ let main = function () {
               minJ = j
             }
           }
-          // console.log('minDistance of ' + minJ + ' and ' + i + ':' + minDistance)
           if (minDistance < 30) {
             let lumpToCombine = allColorLump[i]
             let lumpToAttach = allColorLump[minJ]
-              // console.log('combine with:' + minJ + '\nposition:' + util.inspect(lumpToAttach.position) + 'radius ' + lumpToAttach.radius + '\n')
-              // console.log('before combine:\nposition:' + util.inspect(lumpToCombine.position) + 'radius ' + lumpToCombine.radius + '\n')
             combineColorLump(lumpToCombine, lumpToAttach)
             allColorLump.splice(minJ, 1)
             i--
-            // console.log('after combine:\nposition:' + util.inspect(lumpToCombine.position) + 'radius ' + lumpToCombine.radius + '\n')
           }
         }
-        // console.log('allColorLump.length' + allColorLump.length)
       }
 
-      rotateImage30Degree(allColorLump[0], 3)
-        // for (let i = 0; i < allColorLump.length; i++) {
-        //   let colorLump = allColorLump[i]
-        //   pasteCharOnNewImage(colorLump, './test/output/testImage' + i + '.jpg')
-        // }
+      for (let i = 0; i < allColorLump.length; i++) {
+        let colorLump = allColorLump[i]
+        pasteCharOnNewImage(colorLump, './test/output/char' + i + '.jpg')
+      }
+
+      rotateImage30Degree(allColorLump[0], 3, './test/output/char[0].jpg')
+
     })
     .catch(function (err) {
       console.log(util.inspect(err))
@@ -86,13 +83,9 @@ let main = function () {
 }
 
 let combineColorLump = function (lump1, lump2) {
-  // console.log('lump1.pixels.length:' + lump1.pixels.length)
-  // console.log('lump2.pixels.length:' + lump2.pixels.length)
   lump1.pixels = lump1.pixels.concat(lump2.pixels)
-    // console.log('lump1.pixels.length after:' + lump1.pixels.length)
   lump1.position = getColorLumpPosition(lump1.pixels)
   lump1.radius = getColorLumpRadius(lump1)
-    // console.log('lump combined' + util.inspect(lump1))
   return lump1
 }
 
@@ -107,7 +100,6 @@ let getColorLumpPosition = function (pixelsInColorLump) {
   let sumX = 0
   let sumY = 0
   let pointAmount = pixelsInColorLump.length
-    // console.log('pointAmount:' + pointAmount)
   for (let i = 0; i < pointAmount; i++) {
     let pixel = pixelsInColorLump[i]
     sumX += pixel.x
@@ -121,8 +113,6 @@ let getColorLumpPosition = function (pixelsInColorLump) {
     x: parseInt(aveX, 10),
     y: parseInt(aveY, 10)
   }
-
-  // console.log('position:' + util.inspect(position))
 
   return position
 
@@ -225,7 +215,6 @@ let visitPixelBeside = function (pixel, pixelsVisited, allpixelsInColorLump, ima
   // ↖
   visitPixelLeftUp(pixel, pixelsVisited, allpixelsInColorLump, image)
 
-  // console.log(allpixelsInColorLump)
   return allpixelsInColorLump
 }
 
@@ -318,10 +307,14 @@ let getLeftUpPixel = function (pixel, image) {
 }
 
 // 最后把这个字中的像素点paste到一张新的图里，就把这个字提取出来了
-function pasteCharOnNewImage(colorLump, newImagePath) {
-  let image = changeLumpToImage(colorLump)
-  image.write(newImagePath)
+let pasteCharOnNewImage = function (colorLump, newImagePath) {
+  return new Promise((resolve, reject) => {
+    let image = changeLumpToImage(colorLump)
+    image.write(newImagePath)
+    resolve()
+  })
 }
+
 
 let changeLumpToImage = function (colorLump) {
 
@@ -330,7 +323,6 @@ let changeLumpToImage = function (colorLump) {
   let bottom = position.y - maxRadius
   let rightEdge = position.x - maxRadius
 
-  // console.log(util.inspect(colorLump))
   let image = new Jimp(2 * maxRadius, 2 * maxRadius, 0xFFFFFFFF, function (err, image) {})
   let allpixelsInColorLump = colorLump.pixels
 
@@ -351,19 +343,20 @@ let changeLumpToImage = function (colorLump) {
  * @param  {int} step  [旋转角度的间隔，比如在上面的例子中step就是5]
  * @return {[type]}       [description]
  */
-let rotateImage30Degree = function (colorLump, step) {
-  let image = changeLumpToImage(colorLump)
-  console.log(image.rotate)
+let rotateImage30Degree = Async(function (colorLump, step, imagePath) {
+  Await(pasteCharOnNewImage(colorLump, imagePath))
+  console.log(imagePath)
   for (let degree = 30; degree >= -30; degree -= step) {
-    let tempImage = Object.assign({}, image)
-    console.log(tempImage.rotate)
-    tempImage.rotate(degree)
-    console.log("image rotate by:" + degree)
-    let newImagePath = OUTPUT_DIR + 'degree' + degree + '.jpg'
-    console.log("writing image after rotate to " + newImagePath)
-    tempImage.write(newImagePath)
+    Jimp.read(imagePath)
+      .then(function (tempImage) {
+        tempImage.rotate(degree)
+        console.log("image rotate by:" + degree)
+        let newImagePath = OUTPUT_DIR + 'degree-' + count + '-' + degree + '.jpg'
+        console.log("writing image after rotate to " + newImagePath)
+        tempImage.write(newImagePath)
+      })
   }
-}
+})
 
 /**
  * 旋转汉字 归一化
