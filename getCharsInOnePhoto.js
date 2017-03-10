@@ -349,9 +349,10 @@ let rotateImage30Degree = Async(function (colorLump, step, imagePath) {
   for (let degree = 30; degree >= -30; degree -= step) {
     Jimp.read(imagePath)
       .then(function (tempImage) {
-        tempImage.rotate(degree)
+        tempImage.background(0xFFFFFFFF)
+        tempImage.rotate(degree, false)
         console.log("image rotate by:" + degree)
-        let newImagePath = OUTPUT_DIR + 'degree-' + count + '-' + degree + '.jpg'
+        let newImagePath = OUTPUT_DIR + 'degree-' + degree + '.jpg'
         console.log("writing image after rotate to " + newImagePath)
         tempImage.write(newImagePath)
       })
