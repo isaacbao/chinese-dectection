@@ -74,7 +74,7 @@ let main = function () {
         pasteCharOnNewImage(colorLump, './test/output/char' + i + '.jpg')
       }
 
-      rotateImage30Degree(allColorLump[0], 3, './test/output/char[0].jpg')
+      rotateImage30Degree(allColorLump[4], 3, 'char4.jpg')
 
     })
     .catch(function (err) {
@@ -343,28 +343,84 @@ let changeLumpToImage = function (colorLump) {
  * @param  {int} step  [旋转角度的间隔，比如在上面的例子中step就是5]
  * @return {[type]}       [description]
  */
-let rotateImage30Degree = Async(function (colorLump, step, imagePath) {
+let rotateImage30Degree = Async(function (colorLump, step, lumpName) {
+  let imagePath = OUTPUT_DIR + lumpName
   Await(pasteCharOnNewImage(colorLump, imagePath))
   console.log(imagePath)
+  let validityArray = {}
+  let imagePaths = []
   for (let degree = 30; degree >= -30; degree -= step) {
+    let newImagePath = OUTPUT_DIR + lumpName + '_rotate(' + degree + ').jpg'
+    console.log("writing image after rotate to " + newImagePath)
+    imagePaths.push(newImagePath)
     Jimp.read(imagePath)
       .then(function (tempImage) {
         tempImage.background(0xFFFFFFFF)
         tempImage.rotate(degree, false)
-        console.log("image rotate by:" + degree)
-        let newImagePath = OUTPUT_DIR + 'degree-' + degree + '.jpg'
+        let newImagePath = OUTPUT_DIR + lumpName + '_rotate(' + degree + ').jpg'
         console.log("writing image after rotate to " + newImagePath)
         tempImage.write(newImagePath)
+        let validity = normalizationImage(tempImage)
+        console.log("validity:" + validity)
       })
   }
+
+  let imageArray = []
+  for (let i = 0; i < imagePaths.length; i++) {
+    let newImagePath = imagePaths[i]
+    Await(imageArray.push(getImageSync(newImagePath)))
+  }
+  for (let i = 1; i < imageArray.length; i++) {
+    imageArray[0].composite(imageArray[i], imageArray.bitmap.width, 0)
+  }
 })
+
+let getImageSync = function (imagePath) {
+  return new Promise((resolve, reject) => {
+    Jimp.read(newImagePath)
+      .then(function (image) {
+        resolve(image)
+      })
+  })
+}
+
+/**
+ * 旋转汉字 归一化()
+ * @param  {Jimp.image} image [图片对象]
+ * @return {[type]}       [旋转后的汉字]
+ */
+let normalizationImage = function (image) {
+
+  let width = image.bitmap.width
+  let height = image.bitmap.height
+  let leftMost = width / 2
+  let rigthMost = width / 2
+
+  // let pixelsInHorizons = []
+  for (let y = 0; y < height; y++) {
+    let pixelsInHorizon = 0
+    for (let x = 0; x < width; x++) {
+      let pixel = getPixelFromImage(x, y, image)
+      if (isBlack(pixel)) {
+        if (x < leftMost) {
+          leftMost = x
+        }
+        if (rigthMost < x) {
+          rigthMost = x
+        }
+      }
+    }
+    // pixelsInHorizons.push(pixelsInHorizon)
+  }
+  return rigthMost - leftMost
+}
 
 /**
  * 旋转汉字 归一化
  * @param  {ColorLump} colorLump [汉字色块]
  * @return {[type]}       [旋转后的汉字]
  */
-let normalization = function (colorLump) {
+let normalizationLump = function (colorLump) {
   let maxRadius = Math.floor(colorLump.radius) + 1
   let position = colorLump.position
   let top = position.y + maxRadius

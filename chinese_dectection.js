@@ -2,12 +2,16 @@
 const Tesseract = require('tesseract.js')
 const fs = require('fs')
 
-let imagePath = './test/resource/lian2.png'
-let myImage = fs.readFileSync(imagePath)
+let imageDir = './test/output/'
 
-Tesseract.recognize(imagePath, {
-    lang: 'chi_sim'
-  })
-  .then(function (result) {
-    console.log(result)
-  })
+
+for (let i = 0; i < 5; i++) {
+  let imagePath = imageDir + 'char' + i + '.jpg'
+  let myImage = fs.readFileSync(imagePath)
+  Tesseract.recognize(imagePath, {
+      lang: 'chi_sim'
+    })
+    .then(function (result) {
+      console.log(result)
+    })
+}
