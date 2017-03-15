@@ -366,12 +366,13 @@ let rotateImage30Degree = Async(function (colorLump, step, lumpName) {
   }
 
   let imageArray = []
+  console.log("imagePaths:" + imagePaths)
   for (let i = 0; i < imagePaths.length; i++) {
     let newImagePath = imagePaths[i]
     Await(imageArray.push(getImageSync(newImagePath)))
   }
   for (let i = 1; i < imageArray.length; i++) {
-    imageArray[0].composite(imageArray[i], imageArray.bitmap.width, 0)
+    // imageArray[0].composite(imageArray[i], imageArray.bitmap.width, 0)
   }
 })
 
