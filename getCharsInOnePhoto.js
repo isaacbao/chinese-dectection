@@ -347,38 +347,30 @@ let rotateImage30Degree = Async(function (colorLump, step, lumpName) {
   let imagePath = OUTPUT_DIR + lumpName
   Await(pasteCharOnNewImage(colorLump, imagePath))
   console.log(imagePath)
-  let validityArray = {}
   let imagePaths = []
+  let minValidity = 999
+  let validImagePath
   for (let degree = 30; degree >= -30; degree -= step) {
     let newImagePath = OUTPUT_DIR + lumpName + '_rotate(' + degree + ').jpg'
     console.log("writing image after rotate to " + newImagePath)
     imagePaths.push(newImagePath)
-    Jimp.read(imagePath)
-      .then(function (tempImage) {
-        tempImage.background(0xFFFFFFFF)
-        tempImage.rotate(degree, false)
-        let newImagePath = OUTPUT_DIR + lumpName + '_rotate(' + degree + ').jpg'
-        console.log("writing image after rotate to " + newImagePath)
-        tempImage.write(newImagePath)
-        let validity = normalizationImage(tempImage)
-        console.log("validity:" + validity)
-      })
-  }
+    let tempImage = Await(getImageSync(newImagePath))
+    tempImage.background(0xFFFFFFFF)
+    tempImage.rotate(degree, false)
+    tempImage.write(newImagePath)
+    let validity = normalizationImage(tempImage)
 
-  let imageArray = []
-  console.log("imagePaths:" + imagePaths)
-  for (let i = 0; i < imagePaths.length; i++) {
-    let newImagePath = imagePaths[i]
-    Await(imageArray.push(getImageSync(newImagePath)))
+    if (validity < minValidity) {
+      minValidity = validity
+      validImagePath = newImagePath
+    }
   }
-  for (let i = 1; i < imageArray.length; i++) {
-    // imageArray[0].composite(imageArray[i], imageArray.bitmap.width, 0)
-  }
+  console.log("validity:" + minValidity + "\nvalidImagePath" + validImagePath)
 })
 
 let getImageSync = function (imagePath) {
   return new Promise((resolve, reject) => {
-    Jimp.read(newImagePath)
+    Jimp.read(imagePath)
       .then(function (image) {
         resolve(image)
       })
