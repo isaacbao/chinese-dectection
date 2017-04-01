@@ -355,7 +355,6 @@ let rotateImage30Degree = Async(function (colorLump, step, lumpName) {
         let newImagePath = OUTPUT_DIR + lumpName + '_rotate(' + degree + ').jpg'
         console.log("writing image after rotate to " + newImagePath)
         imagePaths.push(newImagePath)
-        let tempImage = Await(getImageSync(newImagePath))
         let tempImage = Await(getImageSync(imagePath))
         tempImage.background(0xFFFFFFFF).rotate(degree).write(newImagePath)
         let validity = normalizationImage(tempImage)
@@ -365,7 +364,7 @@ let rotateImage30Degree = Async(function (colorLump, step, lumpName) {
             validImagePath = newImagePath
         }
     }
-    // console.log("validity:" + minValidity + "\nvalidImagePath" + validImagePath)
+    console.log("validity:" + minValidity + "\nvalidImagePath" + validImagePath)
 })
 
 let getImageSync = function (imagePath) {
@@ -403,7 +402,6 @@ let normalizationImage = function (image) {
                 }
             }
         }
-        // pixelsInHorizons.push(pixelsInHorizon)
     }
 
     let highest = width / 2
@@ -424,7 +422,6 @@ let normalizationImage = function (image) {
                 }
             }
         }
-        // pixelsInHorizons.push(pixelsInHorizon)
     }
     let charWidth = rigthMost - leftMost
     let charHeight = lowest - highest
